@@ -83,6 +83,7 @@ server.port=2100
 ```properties
 spring.jpa.hibernate.ddl-auto=update
 ```
+permite que Hibernate actualice el esquema automáticamente. Úsala con cuidado según el entorno.
 
 > [!NOTE]
 > Para autenticación básica, el usuario y la contraseña se definen en `src/main/resources/application.properties`.
@@ -93,8 +94,6 @@ spring.jpa.hibernate.ddl-auto=update
 > spring.security.user.name=usuarioUES
 > spring.security.user.password=claveUES
 > ```
-
-permite que Hibernate actualice el esquema automáticamente. Úsala con cuidado según el entorno.
 
 ## 4. Ejecutar la aplicación
 
