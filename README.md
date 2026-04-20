@@ -84,6 +84,16 @@ server.port=2100
 spring.jpa.hibernate.ddl-auto=update
 ```
 
+> [!NOTE]
+> Para autenticación básica, el usuario y la contraseña se definen en `src/main/resources/application.properties`.
+> Revisa ese archivo antes de iniciar la aplicación para conocer las credenciales activas.
+>
+> ```properties
+> # Configurar usuario y contraseña para la autenticación básica
+> spring.security.user.name=usuarioUES
+> spring.security.user.password=claveUES
+> ```
+
 permite que Hibernate actualice el esquema automáticamente. Úsala con cuidado según el entorno.
 
 ## 4. Ejecutar la aplicación
@@ -240,4 +250,91 @@ Se permite conservar nombres en inglés cuando provengan directamente de tecnolo
 - `Gradle`
 
 Sin embargo, el código propio del proyecto debe mantenerse en español y con las convenciones estándar de Java.
+
+
+## 9. Flujo de trabajo Git del equipo
+
+Esta sección define el flujo estándar para colaborar en el proyecto con tres ramas principales: `DEV`, `QA` y `main`.
+
+### 9.1 Ramas principales
+
+- `DEV`: rama de integración de desarrollo.
+  - Aquí se unen funcionalidades nuevas ya revisadas.
+- `QA`: rama de pruebas.
+  - Aquí se valida lo que va a salir a producción.
+- `main`: rama de producción final.
+  - Solo recibe cambios validados en `QA` o hotfixes críticos.
+
+### 9.2 Creación de ramas de trabajo
+
+Para cada tarea nueva, crear una rama desde `DEV`:
+
+- `feature/nombre-corto-de-la-tarea` para funcionalidades.
+- `fix/nombre-corto-del-error` para correcciones en desarrollo.
+- `hotfix/nombre-corto-del-error` para incidencias críticas en producción.
+
+Ejemplo:
+
+```powershell
+git checkout DEV
+git pull origin DEV
+git checkout -b feature/factura-controlador
+```
+
+### 9.3 Flujo de promoción entre ramas
+
+El flujo normal del proyecto será:
+
+1. `feature/*` o `fix/*` -> Pull Request a `DEV`
+2. `DEV` -> Pull Request a `QA` para validación
+3. `QA` -> Pull Request a `main` para salida a producción
+
+Reglas:
+
+- No subir cambios directos a `main`.
+- Evitar saltar de `DEV` a `main` sin pasar por `QA`.
+- Todo merge debe pasar por revisión de código.
+- Resolver conflictos en la rama de trabajo antes del merge.
+
+### 9.4 Convención de commits
+
+Usar commits cortos, claros y en español, con prefijo por tipo:
+
+Formato recomendado:
+
+`tipo: descripcion breve en español`
+
+Tipos sugeridos:
+
+- `feat`: nueva funcionalidad
+- `fix`: corrección de error
+- `refactor`: mejora interna sin cambiar comportamiento funcional
+- `docs`: cambios de documentación
+- `test`: pruebas nuevas o ajustadas
+- `chore`: tareas de mantenimiento
+
+Ejemplos:
+
+- `feat: agregar servicio de calculo de impuestos`
+- `fix: corregir validacion de numero de factura`
+- `refactor: simplificar logica de registro de cliente`
+- `docs: actualizar guia de configuracion de postgresql`
+- `test: agregar pruebas de repositorio de facturas`
+
+### 9.5 Reglas de calidad antes de abrir Pull Request
+
+Antes de solicitar merge a `DEV`, `QA` o `main`, verificar:
+
+- El proyecto compila sin errores.
+- Las pruebas aplicables pasan correctamente.
+- No se suben credenciales reales ni datos sensibles.
+- Nombres de clases, métodos y variables cumplen la convención de español + estándar Java.
+- El alcance del PR está enfocado en una sola tarea o corrección.
+
+Comando útil de validación local:
+
+```powershell
+.\gradlew.bat test
+```
+
 
