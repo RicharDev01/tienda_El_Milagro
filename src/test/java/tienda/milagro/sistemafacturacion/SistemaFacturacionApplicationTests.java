@@ -1,10 +1,10 @@
-package tienda.milagro.sitemafacturacion;
+package tienda.milagro.sistemafacturacion;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SitemaFacturacionApplicationTests {
+class SistemaFacturacionApplicationTests {
 
     @Test
     void contextLoads() {

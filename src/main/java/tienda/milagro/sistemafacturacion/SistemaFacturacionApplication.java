@@ -1,13 +1,13 @@
-package tienda.milagro.sitemafacturacion;
+package tienda.milagro.sistemafacturacion;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SitemaFacturacionApplication {
+public class SistemaFacturacionApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SitemaFacturacionApplication.class, args);
+        SpringApplication.run(SistemaFacturacionApplication.class, args);
     }
 
 }
