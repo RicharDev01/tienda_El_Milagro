@@ -83,6 +83,7 @@ server.port=2100
 ```properties
 spring.jpa.hibernate.ddl-auto=update
 ```
+permite que Hibernate actualice el esquema automáticamente. Úsala con cuidado según el entorno.
 
 > [!NOTE]
 > Para autenticación básica, el usuario y la contraseña se definen en `src/main/resources/application.properties`.
@@ -93,8 +94,6 @@ spring.jpa.hibernate.ddl-auto=update
 > spring.security.user.name=usuarioUES
 > spring.security.user.password=claveUES
 > ```
-
-permite que Hibernate actualice el esquema automáticamente. Úsala con cuidado según el entorno.
 
 ## 4. Ejecutar la aplicación
 
@@ -252,11 +251,99 @@ Se permite conservar nombres en inglés cuando provengan directamente de tecnolo
 Sin embargo, el código propio del proyecto debe mantenerse en español y con las convenciones estándar de Java.
 
 
-## 9. Flujo de trabajo Git del equipo
+## 9. Arquitectura del sistema
+
+El proyecto sigue una **arquitectura en capas**, que separa claramente las responsabilidades del sistema en tres grandes bloques. Esta estructura permite que cada capa pueda evolucionar de forma independiente y facilita el mantenimiento y las pruebas.
+
+### 9.1 Visión general de las capas
+
+```
+src/main/java/tienda/milagro/sistemafacturacion/
+│
+├── dominio/               ← Capa de dominio (reglas de negocio)
+│   ├── excepciones/       ← Excepciones propias del negocio
+│   ├── repositorios/      ← Interfaces de acceso a datos
+│   └── servicios/         ← Lógica de negocio
+│
+├── persistencia/          ← Capa de persistencia (base de datos)
+│   ├── modelos/           ← Entidades JPA (tablas de la base de datos)
+│   └── gestiones/         ← Implementaciones de los repositorios
+│
+└── web/                   ← Capa de presentación (API / HTTP)
+    ├── controladores/     ← Controladores REST (endpoints)
+    └── excepciones/       ← Manejo de errores HTTP
+```
+
+### 9.2 Descripción de cada capa
+
+#### Capa de Dominio (`dominio/`)
+
+Es el núcleo del sistema. Contiene las reglas de negocio y **no depende** de ninguna tecnología externa (ni de Spring, ni de PostgreSQL).
+
+| Paquete | Responsabilidad |
+|---|---|
+| `servicios/` | Lógica de negocio: cálculos, validaciones, flujos de trabajo |
+| `repositorios/` | Interfaces que definen cómo se accede a los datos (sin implementación) |
+| `excepciones/` | Excepciones propias del dominio (ej: `FacturaNoEncontradaExcepcion`) |
+
+#### Capa de Persistencia (`persistencia/`)
+
+Se encarga de la comunicación con la base de datos PostgreSQL mediante JPA/Hibernate.
+
+| Paquete | Responsabilidad |
+|---|---|
+| `modelos/` | Clases anotadas con `@Entity` que representan las tablas de la base de datos |
+| `gestiones/` | Implementaciones de los repositorios definidos en el dominio |
+
+#### Capa de Presentación / Web (`web/`)
+
+Expone la aplicación al mundo exterior a través de endpoints HTTP.
+
+| Paquete | Responsabilidad |
+|---|---|
+| `controladores/` | Clases anotadas con `@RestController` que reciben y responden peticiones HTTP |
+| `excepciones/` | Manejadores globales de errores HTTP (ej: `@ControllerAdvice`) |
+
+### 9.3 Flujo de una petición
+
+El flujo estándar de una solicitud HTTP dentro del sistema es el siguiente:
+
+```
+Cliente HTTP
+    │
+    ▼
+Controlador (web/controladores/)
+    │  Llama al servicio
+    ▼
+Servicio (dominio/servicios/)
+    │  Usa la interfaz del repositorio
+    ▼
+Repositorio - Interfaz (dominio/repositorios/)
+    │  Implementado por
+    ▼
+Gestión (persistencia/gestiones/)
+    │  Opera sobre
+    ▼
+Modelo / Entidad (persistencia/modelos/)
+    │
+    ▼
+Base de datos PostgreSQL
+```
+
+### 9.4 Principios que guían la arquitectura
+
+- **Separación de responsabilidades**: cada capa tiene una función clara y delimitada.
+- **Dependencia hacia el dominio**: las capas externas (web, persistencia) dependen del dominio, nunca al revés.
+- **Independencia tecnológica del dominio**: la lógica de negocio no conoce ni Spring ni PostgreSQL directamente.
+- **Consistencia de idioma**: todos los nombres de clases, métodos y paquetes se mantienen en **español**, siguiendo los estándares definidos en la sección 8.
+
+---
+
+## 10. Flujo de trabajo Git del equipo
 
 Esta sección define el flujo estándar para colaborar en el proyecto con tres ramas principales: `DEV`, `QA` y `main`.
 
-### 9.1 Ramas principales
+### 10.1 Ramas principales
 
 - `DEV`: rama de integración de desarrollo.
   - Aquí se unen funcionalidades nuevas ya revisadas.
@@ -265,7 +352,7 @@ Esta sección define el flujo estándar para colaborar en el proyecto con tres r
 - `main`: rama de producción final.
   - Solo recibe cambios validados en `QA` o hotfixes críticos.
 
-### 9.2 Creación de ramas de trabajo
+### 10.2 Creación de ramas de trabajo
 
 Para cada tarea nueva, crear una rama desde `DEV`:
 
@@ -281,7 +368,7 @@ git pull origin DEV
 git checkout -b feature/factura-controlador
 ```
 
-### 9.3 Flujo de promoción entre ramas
+### 10.3 Flujo de promoción entre ramas
 
 El flujo normal del proyecto será:
 
@@ -296,7 +383,7 @@ Reglas:
 - Todo merge debe pasar por revisión de código.
 - Resolver conflictos en la rama de trabajo antes del merge.
 
-### 9.4 Convención de commits
+### 10.4 Convención de commits
 
 Usar commits cortos, claros y en español, con prefijo por tipo:
 
@@ -321,7 +408,7 @@ Ejemplos:
 - `docs: actualizar guia de configuracion de postgresql`
 - `test: agregar pruebas de repositorio de facturas`
 
-### 9.5 Reglas de calidad antes de abrir Pull Request
+### 10.5 Reglas de calidad antes de abrir Pull Request
 
 Antes de solicitar merge a `DEV`, `QA` o `main`, verificar:
 
