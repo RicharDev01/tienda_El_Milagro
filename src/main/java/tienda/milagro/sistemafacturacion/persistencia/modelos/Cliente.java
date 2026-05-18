@@ -44,5 +44,132 @@ public class Cliente {
     @Column(name = "CLI_FEC_MOD")
     private LocalDateTime fechaModificacion;
 
+    // ------------------------------------------------------------------
+    // Constructores
+    // ------------------------------------------------------------------
+ 
+    /** Constructor sin argumentos requerido por JPA. */
+    public Cliente() {
+    }
+ 
+    /** Constructor completo para uso en pruebas o inicializacion directa. */
+    public Cliente(String dui,
+                   String primerNombre,
+                   String segundoNombre,
+                   String primerApellido,
+                   String segundoApellido,
+                   LocalDate fechaNacimiento,
+                   Boolean esActivo,
+                   LocalDateTime fechaRegistro,
+                   LocalDateTime fechaModificacion) {
+        this.dui = dui;
+        this.primerNombre = primerNombre;
+        this.segundoNombre = segundoNombre;
+        this.primerApellido = primerApellido;
+        this.segundoApellido = segundoApellido;
+        this.fechaNacimiento = fechaNacimiento;
+        this.esActivo = esActivo;
+        this.fechaRegistro = fechaRegistro;
+        this.fechaModificacion = fechaModificacion;
+    }
+ 
+    // ------------------------------------------------------------------
+    // Getters y Setters
+    // ------------------------------------------------------------------
+ 
+    public String getDui() {
+        return dui;
+    }
+ 
+    public void setDui(String dui) {
+        this.dui = dui;
+    }
+ 
+    /**
+     * Solo getter: idInterno es asignado por la BD y nunca debe modificarse
+     * desde la aplicacion (insertable=false, updatable=false).
+     */
+    public Long getIdInterno() {
+        return idInterno;
+    }
+ 
+    public String getPrimerNombre() {
+        return primerNombre;
+    }
+ 
+    public void setPrimerNombre(String primerNombre) {
+        this.primerNombre = primerNombre;
+    }
+ 
+    public String getSegundoNombre() {
+        return segundoNombre;
+    }
+ 
+    public void setSegundoNombre(String segundoNombre) {
+        this.segundoNombre = segundoNombre;
+    }
+ 
+    public String getPrimerApellido() {
+        return primerApellido;
+    }
+ 
+    public void setPrimerApellido(String primerApellido) {
+        this.primerApellido = primerApellido;
+    }
+ 
+    public String getSegundoApellido() {
+        return segundoApellido;
+    }
+ 
+    public void setSegundoApellido(String segundoApellido) {
+        this.segundoApellido = segundoApellido;
+    }
+ 
+    public LocalDate getFechaNacimiento() {
+        return fechaNacimiento;
+    }
+ 
+    public void setFechaNacimiento(LocalDate fechaNacimiento) {
+        this.fechaNacimiento = fechaNacimiento;
+    }
+ 
+    public Boolean getEsActivo() {
+        return esActivo;
+    }
+ 
+    public void setEsActivo(Boolean esActivo) {
+        this.esActivo = esActivo;
+    }
+ 
+    public LocalDateTime getFechaRegistro() {
+        return fechaRegistro;
+    }
+ 
+    public void setFechaRegistro(LocalDateTime fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
+    }
+ 
+    public LocalDateTime getFechaModificacion() {
+        return fechaModificacion;
+    }
+ 
+    public void setFechaModificacion(LocalDateTime fechaModificacion) {
+        this.fechaModificacion = fechaModificacion;
+    }
+ 
+    // ------------------------------------------------------------------
+    // Utilidades de objeto
+    // ------------------------------------------------------------------
+ 
+    @Override
+    public String toString() {
+        return "Cliente{" +
+                "dui='" + dui + '\'' +
+                ", idInterno=" + idInterno +
+                ", primerNombre='" + primerNombre + '\'' +
+                ", primerApellido='" + primerApellido + '\'' +
+                ", esActivo=" + esActivo +
+                '}';
+    }
 }
 
