@@ -6,6 +6,7 @@ import tienda.milagro.sistemafacturacion.persistencia.modelos.Cliente;
 import tienda.milagro.sistemafacturacion.dominio.repositorios.ClienteRepositorio;
 import tienda.milagro.sistemafacturacion.dominio.repositorios.FacturaRepositorio;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -53,6 +54,7 @@ public class ClienteServicioImpl implements ClienteServicio {
         }
         // El campo esActivo se inicializa en true al momento del registro
         cliente.setEsActivo(true);
+        cliente.setFechaRegistro(LocalDateTime.now());
         return clienteRepositorio.save(cliente);
     }
 
@@ -76,6 +78,8 @@ public class ClienteServicioImpl implements ClienteServicio {
         if (datosActualizados.getSegundoApellido() != null) {
             clienteExistente.setSegundoApellido(datosActualizados.getSegundoApellido());
         }
+
+        clienteExistente.setFechaModificacion(LocalDateTime.now());
 
         return clienteRepositorio.save(clienteExistente);
     }
@@ -120,7 +124,7 @@ public class ClienteServicioImpl implements ClienteServicio {
     public void eliminar(String dui) {
         Cliente cliente = obtenerOLanzarExcepcion(dui);
 
-        boolean tieneFacturas = facturaRepositorio.existsByCliDui(dui);
+        boolean tieneFacturas = facturaRepositorio.existsByClienteDui(dui);
 
         if (tieneFacturas) {
             // Eliminacion logica: el historial de facturas queda intacto
