@@ -21,5 +21,5 @@ public interface FacturaRepositorio extends JpaRepository<Factura, Long> {
      * @param dui documento unico de identidad del cliente
      * @return true si el cliente tiene facturas registradas
      */
-    boolean existsByCliDui(String dui);
+    boolean existsByClienteDui(String dui);
 }
