@@ -1,5 +1,6 @@
 package tienda.milagro.sistemafacturacion.persistencia.modelos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class Proveedor {
     private LocalDateTime fechaModificacion;
 
     @OneToMany(mappedBy = "proveedor")
+    @JsonIgnore
     private List<Producto> productos = new ArrayList<>();
 
     // ------------------------------------------------------------------
