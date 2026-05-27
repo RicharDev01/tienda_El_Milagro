@@ -1,0 +1,61 @@
+<h2 mat-dialog-title>
+    {{ modo === 'crear' ? 'Agregar Cliente' :
+    modo === 'editar' ? 'Editar Cliente' :
+    'Detalle del Cliente' }}
+</h2>
+
+<mat-dialog-content>
+
+    <form [formGroup]="formulario" class="formulario">
+
+        <mat-form-field appearance="outline">
+            <mat-label>DUI</mat-label>
+            <input matInput formControlName="dui" [readonly]="modo === 'editar' || modo === 'ver'">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Primer Nombre</mat-label>
+            <input matInput formControlName="primerNombre">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Segundo Nombre</mat-label>
+            <input matInput formControlName="segundoNombre">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Primer Apellido</mat-label>
+            <input matInput formControlName="primerApellido">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Segundo Apellido</mat-label>
+            <input matInput formControlName="segundoApellido">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Fecha de nacimiento</mat-label>
+            <input matInput type="date" formControlName="fechaNacimiento">
+        </mat-form-field>
+
+    </form>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+
+    <button mat-button (click)="cerrar()">
+        Cancelar
+    </button>
+
+    @if (modo !== 'ver') {
+
+    <button mat-raised-button color="primary" (click)="guardar()">
+
+        Guardar
+
+    </button>
+
+    }
+
+</mat-dialog-actions>

@@ -1,0 +1,69 @@
+<section class="proveedores-container">
+
+  <div class="header">
+    <h2>Gestión de Proveedores</h2>
+    <p>Listado de proveedores registrados en el sistema.</p>
+  </div>
+
+  <div class="acciones">
+    <mat-form-field appearance="outline" class="buscador">
+      <mat-label>Buscar por ID, nombre o contacto</mat-label>
+      <input matInput (keyup)="aplicarFiltro($event)" placeholder="Ej: Lácteos, 2222-1002">
+    </mat-form-field>
+
+    <button mat-raised-button class="btn-agregar" (click)="agregarProveedor()">
+      + Agregar proveedor
+    </button>
+  </div>
+
+  <div class="tabla-contenedor">
+
+    <table mat-table [dataSource]="dataSource" matSort>
+
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+        <td mat-cell *matCellDef="let proveedor">{{ proveedor.id }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="nombreProveedor">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Proveedor</th>
+        <td mat-cell *matCellDef="let proveedor">{{ proveedor.nombreProveedor }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="contacto">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Contacto</th>
+        <td mat-cell *matCellDef="let proveedor">{{ proveedor.contacto }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+        <td mat-cell *matCellDef="let proveedor">
+          <span [class.activo]="proveedor.esActivo" [class.inactivo]="!proveedor.esActivo">
+            {{ proveedor.esActivo ? 'Activo' : 'Inactivo' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+
+        <td mat-cell *matCellDef="let proveedor" class="acciones-cell">
+          <div class="acciones-iconos">
+            <mat-icon class="icono ver" (click)="verProveedor(proveedor)">visibility</mat-icon>
+            <mat-icon class="icono editar" (click)="editarProveedor(proveedor)">edit</mat-icon>
+            <mat-icon class="icono eliminar" (click)="eliminarProveedor(proveedor)">delete</mat-icon>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
+
+    </table>
+
+    <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
+    </mat-paginator>
+
+  </div>
+
+</section>

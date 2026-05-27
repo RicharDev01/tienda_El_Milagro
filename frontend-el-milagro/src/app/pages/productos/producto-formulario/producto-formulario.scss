@@ -1,0 +1,28 @@
+.formulario {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-dialog-content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  padding-top: 10px;
+}
+
+::ng-deep .mat-mdc-dialog-surface {
+  width: 700px !important;
+  max-width: 700px !important;
+  border-radius: 16px;
+}
+
+button[color="primary"] {
+  background: #d4a017 !important;
+  color: white !important;
+}

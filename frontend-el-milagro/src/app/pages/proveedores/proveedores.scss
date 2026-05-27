@@ -1,0 +1,176 @@
+.proveedores-container {
+  padding: 32px;
+}
+
+.header {
+  margin-bottom: 24px;
+
+  h2 {
+    color: #0f3d2e;
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: #555;
+  }
+}
+
+.buscador {
+  width: 100%;
+  max-width: 520px;
+  margin-bottom: 20px;
+}
+
+.tabla-contenedor {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+table {
+  width: 100%;
+}
+
+th {
+  background: #0f5132 !important;
+  color: white;
+  font-weight: bold;
+}
+
+td,
+th {
+  padding: 16px;
+}
+
+.activo {
+  color: green;
+  font-weight: bold;
+}
+
+.inactivo {
+  color: red;
+  font-weight: bold;
+}
+
+mat-paginator {
+  border-top: 1px solid #eee;
+}
+
+::ng-deep .mat-sort-header-arrow {
+  color: white !important;
+  opacity: 1 !important;
+}
+
+::ng-deep .mat-sort-header-container {
+  gap: 10px;
+}
+
+.acciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.buscador {
+  width: 45%;
+  margin-bottom: 0;
+}
+
+.btn-agregar {
+  background: #d4a017 !important;
+  color: white !important;
+  font-weight: bold;
+  border-radius: 5px;
+  padding: 18px 25px;
+  margin-bottom: 21px;
+
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-agregar:hover {
+  background: #e0ad1d !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-agregar:active {
+  transform: scale(0.96);
+}
+
+th,
+td {
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.mat-mdc-header-row {
+  height: 48px;
+}
+
+.mat-mdc-row {
+  height: 46px;
+}
+
+.acciones-header {
+  width: 140px;
+  text-align: center;
+}
+
+.icono {
+  cursor: pointer;
+  font-size: 22px;
+  transition: transform 0.2s ease;
+}
+
+.icono:hover {
+  transform: scale(1.15);
+}
+
+.ver {
+  color: #0f5132;
+}
+
+.editar {
+  color: #d4a017;
+}
+
+.eliminar {
+  color: #c62828;
+}
+
+
+.mat-column-dui {
+  width: 18%;
+}
+
+.mat-column-nombre {
+  width: 24%;
+}
+
+.mat-column-apellido {
+  width: 26%;
+}
+
+.mat-column-estado {
+  width: 16%;
+}
+
+.mat-column-acciones {
+  width: 120px;
+  max-width: 120px;
+  text-align: center;
+}
+
+.acciones-cell {
+  text-align: center;
+}
+
+.acciones-iconos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}

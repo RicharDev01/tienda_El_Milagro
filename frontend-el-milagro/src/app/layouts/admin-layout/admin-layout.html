@@ -1,0 +1,25 @@
+<div class="layout">
+  <aside class="sidebar">
+    <h2>El Milagro</h2>
+
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+      <a routerLink="/productos" routerLinkActive="active-link">Productos</a>
+      <a routerLink="/clientes" routerLinkActive="active-link">Clientes</a>
+      <a routerLink="/facturacion" routerLinkActive="active-link">Facturación</a>
+      <a routerLink="/reportes" routerLinkActive="active-link">Reportes</a>
+      <a routerLink="/proveedores" routerLinkActive="active-link">Proveedores</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <h1>Sistema de Facturación</h1>
+      <button routerLink="/login">Cerrar sesión</button>
+    </header>
+
+    <section class="dashboard">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>
