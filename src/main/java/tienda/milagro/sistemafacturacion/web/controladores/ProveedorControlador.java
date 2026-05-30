@@ -3,6 +3,7 @@ package tienda.milagro.sistemafacturacion.web.controladores;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tienda.milagro.sistemafacturacion.persistencia.modelos.Proveedor;
 import tienda.milagro.sistemafacturacion.dominio.servicios.ProveedorServicio;
@@ -24,6 +25,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/proveedores")
+@PreAuthorize("hasRole('ADMINISTRADOR')")
 public class ProveedorControlador {
 
     // ------------------------------------------------------------------

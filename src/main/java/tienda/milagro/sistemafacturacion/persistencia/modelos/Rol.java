@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import lombok.Setter;
+import lombok.Getter;
 
 @Entity
 @Table(name = "ROL")
+@Setter @Getter
 public class Rol {
 
     @Id

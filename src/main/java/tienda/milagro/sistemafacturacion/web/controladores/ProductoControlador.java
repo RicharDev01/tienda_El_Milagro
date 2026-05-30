@@ -2,6 +2,7 @@ package tienda.milagro.sistemafacturacion.web.controladores;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tienda.milagro.sistemafacturacion.dominio.servicios.ProductoServicio;
 import tienda.milagro.sistemafacturacion.persistencia.modelos.Producto;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/productos")
+@PreAuthorize("hasRole('ADMINISTRADOR')")
 public class ProductoControlador {
 
     private final ProductoServicio productoServicio;
