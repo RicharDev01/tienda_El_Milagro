@@ -120,6 +120,67 @@ http://localhost:2100
 > [!CAUTION]
 > Si cambiaste `server.port`, usa el puerto que hayas configurado.
 
+### 4.1 Autenticación y acceso a recursos protegidos (JWT)
+
+El backend usa autenticación con token JWT. Para consumir recursos protegidos, primero debes iniciar sesión y luego enviar el token en el encabezado `Authorization`.
+
+#### Paso 1: iniciar sesión
+
+Endpoint:
+
+```http
+POST http://localhost:2100/api/autenticacion/iniciar-sesion
+```
+
+Cuerpo de solicitud:
+
+```json
+{
+  "nombreUsuario": "admin.mario",
+  "contrasena": "Admin123*"
+}
+```
+
+Respuesta esperada:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "tipo": "Bearer",
+  "nombreUsuario": "admin.mario",
+  "roles": [
+    "ADMINISTRADOR"
+  ]
+}
+```
+
+#### Paso 2: usar el token en endpoints protegidos
+
+Ejemplo de consulta de clientes:
+
+```http
+GET http://localhost:2100/clientes/listar
+Authorization: Bearer <token_obtenido_en_login>
+```
+
+Ejemplo en PowerShell:
+
+```powershell
+$cuerpo = @{
+  nombreUsuario = "admin.mario"
+  contrasena = "Admin123*"
+} | ConvertTo-Json
+
+$respuesta = Invoke-RestMethod -Method Post -Uri "http://localhost:2100/api/autenticacion/iniciar-sesion" -ContentType "application/json" -Body $cuerpo
+
+$token = $respuesta.token
+
+Invoke-RestMethod -Method Get -Uri "http://localhost:2100/clientes/listar" -Headers @{ Authorization = "Bearer $token" }
+```
+
+> [!NOTE]
+> Si intentas abrir directamente `http://localhost:2100` o un endpoint protegido desde el navegador sin token, recibirás `403 Forbidden`.
+
 ## 5. Verificar que el proyecto compila correctamente
 
 Antes o después de levantar la aplicación, puedes ejecutar las pruebas con:

@@ -1,9 +1,13 @@
 package tienda.milagro.sistemafacturacion.persistencia.modelos;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "STOCK")
+@Getter
+@Setter
 public class Stock {
 
     @Id

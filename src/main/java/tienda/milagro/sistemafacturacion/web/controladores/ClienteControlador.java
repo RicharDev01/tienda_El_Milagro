@@ -2,6 +2,7 @@ package tienda.milagro.sistemafacturacion.web.controladores;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tienda.milagro.sistemafacturacion.persistencia.modelos.Cliente;
 import tienda.milagro.sistemafacturacion.dominio.servicios.ClienteServicio;
@@ -44,6 +45,7 @@ public class ClienteControlador {
      * @return 200 OK con la lista de clientes
      */
     @GetMapping("/listar")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
     public ResponseEntity<List<Cliente>> listar() {
         List<Cliente> clientes = clienteServicio.listarTodos();
         return ResponseEntity.ok(clientes);
@@ -57,6 +59,7 @@ public class ClienteControlador {
      * @return 200 OK con la lista de clientes activos
      */
     @GetMapping("/listar/activos")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
     public ResponseEntity<List<Cliente>> listarActivos() {
         List<Cliente> clientesActivos = clienteServicio.listarActivos();
         return ResponseEntity.ok(clientesActivos);
@@ -71,6 +74,7 @@ public class ClienteControlador {
      * @return 200 OK con el cliente encontrado, o 404 si no existe
      */
     @GetMapping("/buscar/{dui}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
     public ResponseEntity<?> buscarPorDui(@PathVariable String dui) {
         try {
             Cliente cliente = clienteServicio.buscarPorDui(dui);
@@ -90,6 +94,7 @@ public class ClienteControlador {
      * @return 201 CREATED con el cliente registrado, o 409 si el DUI ya existe
      */
     @PostMapping("/registrar")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
     public ResponseEntity<?> registrar(@RequestBody Cliente cliente) {
         try {
             Cliente clienteRegistrado = clienteServicio.registrar(cliente);
@@ -110,6 +115,7 @@ public class ClienteControlador {
      * @return 200 OK con el cliente actualizado, o 404 si no existe
      */
     @PutMapping("/actualizar/{dui}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
     public ResponseEntity<?> actualizar(@PathVariable String dui,
                                          @RequestBody Cliente cliente) {
         try {
@@ -132,6 +138,7 @@ public class ClienteControlador {
      * @return 200 OK con mensaje de confirmacion, o 404 si no existe
      */
     @DeleteMapping("/eliminar/{dui}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
     public ResponseEntity<String> eliminar(@PathVariable String dui) {
         try {
             clienteServicio.eliminar(dui);
