@@ -12,7 +12,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/productos")
-@PreAuthorize("hasRole('ADMINISTRADOR')")
 public class ProductoControlador {
 
     private final ProductoServicio productoServicio;
@@ -26,6 +25,7 @@ public class ProductoControlador {
     // Retorna todos los productos sin filtrar por estado.
     // -------------------------------------------------------------------------
     @GetMapping("/listar")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
     public ResponseEntity<?> listarTodos() {
         try {
             List<Producto> productos = productoServicio.listarTodos();
@@ -40,6 +40,7 @@ public class ProductoControlador {
     // Retorna únicamente los productos con esActivo = true.
     // -------------------------------------------------------------------------
     @GetMapping("/listar/activos")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
     public ResponseEntity<?> listarActivos() {
         try {
             List<Producto> productos = productoServicio.listarActivos();
@@ -54,6 +55,7 @@ public class ProductoControlador {
     // Retorna el producto correspondiente al id indicado.
     // -------------------------------------------------------------------------
     @GetMapping("/buscar/{id}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         try {
             Producto producto = productoServicio.buscarPorId(id);
@@ -70,6 +72,7 @@ public class ProductoControlador {
     // Crea un nuevo producto. Recibe el cuerpo en formato JSON.
     // -------------------------------------------------------------------------
     @PostMapping("/registrar")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> registrar(@RequestBody Producto producto) {
         try {
             Producto guardado = productoServicio.registrar(producto);
@@ -86,6 +89,7 @@ public class ProductoControlador {
     // Actualiza los campos modificables de un producto existente.
     // -------------------------------------------------------------------------
     @PutMapping("/actualizar/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> actualizar(@PathVariable Long id,
                                         @RequestBody Producto producto) {
         try {
@@ -107,6 +111,7 @@ public class ProductoControlador {
     // Realiza la eliminación lógica (esActivo = false).
     // -------------------------------------------------------------------------
     @DeleteMapping("/eliminar/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> desactivar(@PathVariable Long id) {
         try {
             productoServicio.desactivar(id);
