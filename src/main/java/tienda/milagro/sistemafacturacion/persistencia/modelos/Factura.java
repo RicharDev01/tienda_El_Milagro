@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ import java.util.List;
 @Table(name = "FACTURA")
 @Getter
 @Setter
+@ToString
 public class Factura {
 
     @Id

@@ -117,9 +117,9 @@ public class FacturaServicioImpl implements FacturaServicio {
         factura.setFecha(facturaSolicitud.getFecha() != null ? facturaSolicitud.getFecha() : LocalDate.now());
         factura.setSubtotal(subtotal.setScale(2, RoundingMode.HALF_UP));
 
-        BigDecimal iva = calcularIva(factura.getSubtotal());
-        factura.setIva(iva);
-        factura.setTotal(factura.getSubtotal().add(iva).setScale(2, RoundingMode.HALF_UP));
+        BigDecimal montoIva = calcularIva(factura.getSubtotal());
+        factura.setIva(PORCENTAJE_IVA);
+        factura.setTotal(factura.getSubtotal().add(montoIva).setScale(2, RoundingMode.HALF_UP));
         factura.setFechaRegistro(LocalDateTime.now());
         factura.setFechaModificacion(null);
 
