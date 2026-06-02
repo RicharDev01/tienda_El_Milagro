@@ -67,7 +67,7 @@ public class AutenticacionServicioImpl implements AutenticacionServicio {
 
     private Usuario obtenerUsuarioPorNombreUsuario(String nombreUsuario) {
         try {
-            return usuarioRepositorio.findByNombreUsuario(nombreUsuario)
+            return usuarioRepositorio.findByNombreUsuarioIgnoreCase(nombreUsuario)
                     .orElseThrow(UsuarioNoEncontradoExcepcion::new);
         } catch (UsuarioNoEncontradoExcepcion excepcion) {
             // En inicio de sesion no se expone si el usuario existe o no.
