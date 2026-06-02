@@ -1,5 +1,6 @@
 package tienda.milagro.sistemafacturacion.persistencia.modelos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -30,6 +31,7 @@ public class Factura {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USU_ID", nullable = false)
+    @JsonIgnoreProperties({"clave", "fechaRegistro", "fechaModificacion", "roles", "hibernateLazyInitializer", "handler"})
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
