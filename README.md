@@ -181,6 +181,26 @@ Invoke-RestMethod -Method Get -Uri "http://localhost:2100/clientes/listar" -Head
 > [!NOTE]
 > Si intentas abrir directamente `http://localhost:2100` o un endpoint protegido desde el navegador sin token, recibirás `403 Forbidden`.
 
+### 4.2 Documentacion API con Swagger (OpenAPI)
+
+Una vez levantado el backend, puedes consultar la documentacion interactiva en:
+
+```text
+http://localhost:2100/swagger-ui/index.html
+```
+
+El documento OpenAPI en formato JSON esta disponible en:
+
+```text
+http://localhost:2100/v3/api-docs
+```
+
+Para endpoints protegidos:
+
+1. Inicia sesion en `POST /api/autenticacion/iniciar-sesion`.
+2. Copia el token JWT.
+3. En Swagger, presiona **Authorize** y pega: `Bearer <tu_token>`.
+
 ## 5. Verificar que el proyecto compila correctamente
 
 Antes o después de levantar la aplicación, puedes ejecutar las pruebas con:

@@ -1,5 +1,8 @@
 package tienda.milagro.sistemafacturacion.web.controladores;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +16,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/productos")
+@Tag(name = "Productos", description = "Gestion de productos")
+@SecurityRequirement(name = "bearerAuth")
 public class ProductoControlador {
 
     private final ProductoServicio productoServicio;
@@ -27,6 +32,7 @@ public class ProductoControlador {
     // -------------------------------------------------------------------------
     @GetMapping("/listar")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Listar productos", description = "Retorna todos los productos")
     public ResponseEntity<?> listarTodos() {
         try {
             List<Producto> productos = productoServicio.listarTodos();
@@ -42,6 +48,7 @@ public class ProductoControlador {
     // -------------------------------------------------------------------------
     @GetMapping("/listar/activos")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Listar productos activos", description = "Retorna solo productos activos")
     public ResponseEntity<?> listarActivos() {
         try {
             List<Producto> productos = productoServicio.listarActivos();
@@ -57,6 +64,7 @@ public class ProductoControlador {
     // -------------------------------------------------------------------------
     @GetMapping("/buscar/{id}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Buscar producto por ID", description = "Obtiene un producto especifico por su id")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         try {
             Producto producto = productoServicio.buscarPorId(id);
@@ -74,6 +82,7 @@ public class ProductoControlador {
     // -------------------------------------------------------------------------
     @PostMapping({"", "/registrar"})
     @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Registrar producto", description = "Crea un producto y su stock inicial en una sola transaccion")
     public ResponseEntity<?> registrar(@RequestBody Producto producto) {
         try {
             Producto guardado = productoServicio.registrarProducto(producto);
@@ -93,6 +102,7 @@ public class ProductoControlador {
     // -------------------------------------------------------------------------
     @PutMapping("/actualizar/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Actualizar producto", description = "Actualiza los campos editables de un producto existente")
     public ResponseEntity<?> actualizar(@PathVariable Long id,
                                         @RequestBody Producto producto) {
         try {
@@ -117,6 +127,7 @@ public class ProductoControlador {
     // -------------------------------------------------------------------------
     @DeleteMapping("/eliminar/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Desactivar producto", description = "Realiza eliminacion logica del producto")
     public ResponseEntity<?> desactivar(@PathVariable Long id) {
         try {
             productoServicio.desactivar(id);

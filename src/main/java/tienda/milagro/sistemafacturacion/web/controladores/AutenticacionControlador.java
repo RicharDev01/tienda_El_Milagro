@@ -1,5 +1,7 @@
 package tienda.milagro.sistemafacturacion.web.controladores;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/autenticacion")
+@Tag(name = "Autenticacion", description = "Endpoints para inicio de sesion y emision de JWT")
 public class AutenticacionControlador {
 
     private final AutenticacionServicio autenticacionServicio;
@@ -20,6 +23,7 @@ public class AutenticacionControlador {
     }
 
     @PostMapping("/iniciar-sesion")
+    @Operation(summary = "Iniciar sesion", description = "Autentica un usuario y retorna token JWT con metadatos del usuario autenticado")
     public ResponseEntity<Map<String, Object>> iniciarSesion(@RequestBody Map<String, String> solicitud) {
         String nombreUsuario = solicitud.getOrDefault("nombreUsuario", "");
         String contrasena = solicitud.getOrDefault("contrasena", "");

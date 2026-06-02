@@ -1,5 +1,8 @@
 package tienda.milagro.sistemafacturacion.web.controladores;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,6 +15,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/stock")
+@Tag(name = "Stock", description = "Consulta y actualizacion de inventario")
+@SecurityRequirement(name = "bearerAuth")
 public class StockControlador {
 
     private final StockServicio stockServicio;
@@ -22,6 +27,7 @@ public class StockControlador {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Listar stock", description = "Retorna todos los registros de stock")
     public ResponseEntity<?> listarTodos() {
         try {
             List<Stock> stocks = stockServicio.listarTodos();
@@ -33,6 +39,7 @@ public class StockControlador {
 
     @GetMapping("/{productoId}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Consultar stock por producto", description = "Obtiene el stock asociado a un producto")
     public ResponseEntity<?> buscarPorProductoId(@PathVariable Long productoId) {
         try {
             Stock stock = stockServicio.buscarPorProductoId(productoId);
@@ -46,6 +53,7 @@ public class StockControlador {
 
     @PutMapping("/{productoId}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Actualizar cantidad de stock", description = "Actualiza la cantidad disponible de un producto")
     public ResponseEntity<?> actualizarCantidad(@PathVariable Long productoId,
                                                 @RequestBody Stock stockSolicitud) {
         try {

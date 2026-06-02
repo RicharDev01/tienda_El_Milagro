@@ -1,5 +1,8 @@
 package tienda.milagro.sistemafacturacion.web.controladores;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +19,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/clientes")
 @CrossOrigin(origins = "http://localhost:4200")
+@Tag(name = "Clientes", description = "Gestion de clientes")
+@SecurityRequirement(name = "bearerAuth")
 public class ClienteControlador {
 
     // ------------------------------------------------------------------
@@ -46,6 +51,7 @@ public class ClienteControlador {
      */
     @GetMapping("/listar")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Listar clientes", description = "Retorna todos los clientes, activos e inactivos")
     public ResponseEntity<List<Cliente>> listar() {
         List<Cliente> clientes = clienteServicio.listarTodos();
         return ResponseEntity.ok(clientes);
@@ -60,6 +66,7 @@ public class ClienteControlador {
      */
     @GetMapping("/listar/activos")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Listar clientes activos", description = "Retorna unicamente clientes con estado activo")
     public ResponseEntity<List<Cliente>> listarActivos() {
         List<Cliente> clientesActivos = clienteServicio.listarActivos();
         return ResponseEntity.ok(clientesActivos);
@@ -75,6 +82,7 @@ public class ClienteControlador {
      */
     @GetMapping("/buscar/{dui}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Buscar cliente por DUI", description = "Obtiene los datos de un cliente a partir de su DUI")
     public ResponseEntity<?> buscarPorDui(@PathVariable String dui) {
         try {
             Cliente cliente = clienteServicio.buscarPorDui(dui);
@@ -95,6 +103,7 @@ public class ClienteControlador {
      */
     @PostMapping("/registrar")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Registrar cliente", description = "Crea un nuevo cliente en el sistema")
     public ResponseEntity<?> registrar(@RequestBody Cliente cliente) {
         try {
             Cliente clienteRegistrado = clienteServicio.registrar(cliente);
@@ -116,6 +125,7 @@ public class ClienteControlador {
      */
     @PutMapping("/actualizar/{dui}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Actualizar cliente", description = "Modifica los datos de un cliente existente")
     public ResponseEntity<?> actualizar(@PathVariable String dui,
                                          @RequestBody Cliente cliente) {
         try {
@@ -139,6 +149,7 @@ public class ClienteControlador {
      */
     @DeleteMapping("/eliminar/{dui}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Eliminar cliente", description = "Elimina fisicamente o desactiva logicamente un cliente segun sus facturas asociadas")
     public ResponseEntity<String> eliminar(@PathVariable String dui) {
         try {
             clienteServicio.eliminar(dui);

@@ -1,5 +1,8 @@
 package tienda.milagro.sistemafacturacion.web.controladores;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +23,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/facturas")
+@Tag(name = "Facturas", description = "Gestion y consulta de facturas")
+@SecurityRequirement(name = "bearerAuth")
 public class FacturaControlador {
 
     private final FacturaServicio facturaServicio;
@@ -30,6 +35,7 @@ public class FacturaControlador {
 
     @PostMapping("/generar")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Generar factura", description = "Registra una factura con sus detalles y aplica reglas de stock")
     public ResponseEntity<Factura> generarFactura(@RequestBody Factura facturaSolicitud) {
         Factura factura = facturaServicio.generarFactura(facturaSolicitud);
         return ResponseEntity.ok(factura);
@@ -37,6 +43,7 @@ public class FacturaControlador {
 
     @GetMapping("/consultar")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Consultar facturas", description = "Consulta facturas por rango de fechas y/o DUI de cliente")
     public ResponseEntity<List<Factura>> consultarFacturas(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
@@ -52,6 +59,7 @@ public class FacturaControlador {
 
     @GetMapping("/consultar/{idFactura}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Consultar factura por ID", description = "Obtiene una factura especifica por su identificador")
     public ResponseEntity<Factura> consultarFacturaPorId(@PathVariable String idFactura) {
         Factura factura = facturaServicio.consultarFacturaPorId(idFactura);
         return ResponseEntity.ok(factura);
@@ -59,6 +67,7 @@ public class FacturaControlador {
 
     @GetMapping("/consultar/{idFactura}/detalles")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Consultar detalles de factura", description = "Retorna los detalles de productos de una factura")
     public ResponseEntity<List<DetalleFactura>> consultarDetalleFactura(@PathVariable String idFactura) {
         Factura factura = facturaServicio.consultarFacturaPorId(idFactura);
         return ResponseEntity.ok(factura.getDetalles());
@@ -66,6 +75,7 @@ public class FacturaControlador {
 
     @GetMapping("/reporte-mensual")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Generar reporte mensual", description = "Genera reporte de ventas del mes y anio solicitados")
     public ResponseEntity<Map<String, Object>> generarReporteMensual(@RequestParam Integer mes,
                                                                      @RequestParam Integer anio) {
         Map<String, Object> reporte = facturaServicio.generarReporteMensual(mes, anio);
