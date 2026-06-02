@@ -8,6 +8,7 @@ import tienda.milagro.sistemafacturacion.dominio.excepciones.CredencialesInvalid
 import tienda.milagro.sistemafacturacion.dominio.excepciones.ClienteNoEncontradoExcepcion;
 import tienda.milagro.sistemafacturacion.dominio.excepciones.FacturaNoEncontradaExcepcion;
 import tienda.milagro.sistemafacturacion.dominio.excepciones.ProductoNoEncontradoExcepcion;
+import tienda.milagro.sistemafacturacion.dominio.excepciones.ProveedorNoEncontradoExcepcion;
 import tienda.milagro.sistemafacturacion.dominio.excepciones.ReporteInvalidoExcepcion;
 import tienda.milagro.sistemafacturacion.dominio.excepciones.StockInsuficienteExcepcion;
 import tienda.milagro.sistemafacturacion.dominio.excepciones.UsuarioInactivoExcepcion;
@@ -50,6 +51,12 @@ public class ManejadorExcepcionesGlobal {
 
     @ExceptionHandler(ProductoNoEncontradoExcepcion.class)
     public ResponseEntity<Map<String, String>> manejarProductoNoEncontrado(ProductoNoEncontradoExcepcion excepcion) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", excepcion.getMessage()));
+    }
+
+    @ExceptionHandler(ProveedorNoEncontradoExcepcion.class)
+    public ResponseEntity<Map<String, String>> manejarProveedorNoEncontrado(ProveedorNoEncontradoExcepcion excepcion) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", excepcion.getMessage()));
     }

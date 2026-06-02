@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import tienda.milagro.sistemafacturacion.dominio.excepciones.ProveedorNoEncontradoExcepcion;
 import tienda.milagro.sistemafacturacion.dominio.servicios.ProductoServicio;
 import tienda.milagro.sistemafacturacion.persistencia.modelos.Producto;
 
@@ -68,17 +69,19 @@ public class ProductoControlador {
     }
 
     // -------------------------------------------------------------------------
-    // POST /productos/registrar
+    // POST /productos
     // Crea un nuevo producto. Recibe el cuerpo en formato JSON.
     // -------------------------------------------------------------------------
-    @PostMapping("/registrar")
+    @PostMapping({"", "/registrar"})
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> registrar(@RequestBody Producto producto) {
         try {
-            Producto guardado = productoServicio.registrar(producto);
+            Producto guardado = productoServicio.registrarProducto(producto);
             return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
         } catch (IllegalArgumentException e) {
             return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (ProveedorNoEncontradoExcepcion e) {
+            return buildError(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
             return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -95,6 +98,8 @@ public class ProductoControlador {
         try {
             Producto actualizado = productoServicio.actualizar(id, producto);
             return ResponseEntity.ok(actualizado);
+        } catch (ProveedorNoEncontradoExcepcion e) {
+            return buildError(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (RuntimeException e) {
             // Distingue entre "no encontrado" e "argumento inválido"
             if (e instanceof IllegalArgumentException) {

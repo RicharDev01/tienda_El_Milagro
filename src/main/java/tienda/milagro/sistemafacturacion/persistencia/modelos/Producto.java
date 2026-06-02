@@ -40,5 +40,8 @@ public class Producto {
     @JsonIgnore
     @OneToOne(mappedBy = "producto")
     private Stock stock;
-    
+
+    @Transient
+    private Integer cantidadInicial;
+
 }
