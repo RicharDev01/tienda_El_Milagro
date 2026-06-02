@@ -1,5 +1,6 @@
 package tienda.milagro.sistemafacturacion.persistencia.modelos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +18,7 @@ public class Stock {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PRO_ID", nullable = false, unique = true)
+    @JsonIgnore
     private Producto producto;
 
     @Column(name = "STK_CANTIDAD")

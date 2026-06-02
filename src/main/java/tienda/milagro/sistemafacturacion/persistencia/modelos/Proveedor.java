@@ -1,14 +1,20 @@
 package tienda.milagro.sistemafacturacion.persistencia.modelos;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "PROVEEDOR")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Proveedor {
 
     @Id
@@ -55,67 +61,7 @@ public class Proveedor {
         this.fechaRegistro = fechaRegistro;
         this.fechaModificacion = fechaModificacion;
     }
- 
-    // ------------------------------------------------------------------
-    // Getters y Setters
-    // ------------------------------------------------------------------
- 
-    public Long getId() {
-        return id;
-    }
- 
-    public void setId(Long id) {
-        this.id = id;
-    }
- 
-    public String getNombreProveedor() {
-        return nombreProveedor;
-    }
- 
-    public void setNombreProveedor(String nombreProveedor) {
-        this.nombreProveedor = nombreProveedor;
-    }
- 
-    public String getContacto() {
-        return contacto;
-    }
- 
-    public void setContacto(String contacto) {
-        this.contacto = contacto;
-    }
- 
-    public Boolean getEsActivo() {
-        return esActivo;
-    }
- 
-    public void setEsActivo(Boolean esActivo) {
-        this.esActivo = esActivo;
-    }
- 
-    public LocalDateTime getFechaRegistro() {
-        return fechaRegistro;
-    }
- 
-    public void setFechaRegistro(LocalDateTime fechaRegistro) {
-        this.fechaRegistro = fechaRegistro;
-    }
- 
-    public LocalDateTime getFechaModificacion() {
-        return fechaModificacion;
-    }
- 
-    public void setFechaModificacion(LocalDateTime fechaModificacion) {
-        this.fechaModificacion = fechaModificacion;
-    }
- 
-    public List<Producto> getProductos() {
-        return productos;
-    }
- 
-    public void setProductos(List<Producto> productos) {
-        this.productos = productos;
-    }
- 
+
     // ------------------------------------------------------------------
     // Utilidades de objeto
     // ------------------------------------------------------------------

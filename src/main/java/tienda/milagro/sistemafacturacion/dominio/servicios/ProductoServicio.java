@@ -43,7 +43,7 @@ public interface ProductoServicio {
      * @return el producto persistido con su id generado
      * @throws IllegalArgumentException si el precio es negativo
      */
-    Producto registrar(Producto producto);
+    Producto registrarProducto(Producto producto);
 
     /**
      * Actualiza los campos modificables de un producto existente:

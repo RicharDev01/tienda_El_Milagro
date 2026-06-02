@@ -1,5 +1,6 @@
 package tienda.milagro.sistemafacturacion.persistencia.modelos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,7 +37,11 @@ public class Producto {
     @Column(name = "PROD_FEC_MOD")
     private LocalDateTime fechaModificacion;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "producto")
     private Stock stock;
-    
+
+    @Transient
+    private Integer cantidadInicial;
+
 }

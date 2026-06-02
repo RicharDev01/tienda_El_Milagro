@@ -1,5 +1,8 @@
 package tienda.milagro.sistemafacturacion.web.controladores;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +29,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/proveedores")
 @PreAuthorize("hasRole('ADMINISTRADOR')")
+@Tag(name = "Proveedores", description = "Gestion de proveedores")
+@SecurityRequirement(name = "bearerAuth")
 public class ProveedorControlador {
 
     // ------------------------------------------------------------------
@@ -55,6 +60,7 @@ public class ProveedorControlador {
      * @return 200 OK con la lista completa de proveedores
      */
     @GetMapping("/listar")
+    @Operation(summary = "Listar proveedores", description = "Retorna todos los proveedores")
     public ResponseEntity<List<Proveedor>> listar() {
         return ResponseEntity.ok(proveedorServicio.listarTodos());
     }
@@ -67,6 +73,7 @@ public class ProveedorControlador {
      * @return 200 OK con la lista de proveedores activos
      */
     @GetMapping("/listar/activos")
+    @Operation(summary = "Listar proveedores activos", description = "Retorna solo proveedores activos")
     public ResponseEntity<List<Proveedor>> listarActivos() {
         return ResponseEntity.ok(proveedorServicio.listarActivos());
     }
@@ -80,6 +87,7 @@ public class ProveedorControlador {
      * @return 200 OK con el proveedor, o 404 si no existe
      */
     @GetMapping("/buscar/{id}")
+    @Operation(summary = "Buscar proveedor por ID", description = "Obtiene un proveedor por su identificador")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(proveedorServicio.buscarPorId(id));
@@ -97,6 +105,7 @@ public class ProveedorControlador {
      * @return 200 OK con la lista de coincidencias
      */
     @GetMapping("/buscar/nombre")
+    @Operation(summary = "Buscar proveedores por nombre", description = "Retorna proveedores cuyo nombre contiene el valor enviado")
     public ResponseEntity<List<Proveedor>> buscarPorNombre(
             @RequestParam(name = "valor") String valor) {
         return ResponseEntity.ok(proveedorServicio.buscarPorNombre(valor));
@@ -116,6 +125,7 @@ public class ProveedorControlador {
      * @return 201 CREATED con el proveedor registrado, o 400 si el nombre ya existe
      */
     @PostMapping("/registrar")
+    @Operation(summary = "Registrar proveedor", description = "Crea un nuevo proveedor")
     public ResponseEntity<?> registrar(@RequestBody Proveedor proveedor) {
         try {
             Proveedor proveedorRegistrado = proveedorServicio.registrar(proveedor);
@@ -136,6 +146,7 @@ public class ProveedorControlador {
      * @return 200 OK con el proveedor actualizado, 404 si no existe, 400 si nombre duplicado
      */
     @PutMapping("/actualizar/{id}")
+    @Operation(summary = "Actualizar proveedor", description = "Modifica los datos de un proveedor existente")
     public ResponseEntity<?> actualizar(@PathVariable Long id,
                                          @RequestBody Proveedor datosActualizados) {
         try {
@@ -156,6 +167,7 @@ public class ProveedorControlador {
      * @return 200 OK con mensaje de confirmacion, 404 si no existe, 400 si ya estaba inactivo
      */
     @DeleteMapping("/eliminar/{id}")
+    @Operation(summary = "Desactivar proveedor", description = "Realiza eliminacion logica del proveedor")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         try {
             proveedorServicio.desactivar(id);
@@ -177,6 +189,7 @@ public class ProveedorControlador {
      * @return 200 OK con el proveedor reactivado, 404 si no existe, 400 si ya estaba activo
      */
     @PatchMapping("/reactivar/{id}")
+    @Operation(summary = "Reactivar proveedor", description = "Activa nuevamente un proveedor desactivado")
     public ResponseEntity<?> reactivar(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(proveedorServicio.reactivar(id));

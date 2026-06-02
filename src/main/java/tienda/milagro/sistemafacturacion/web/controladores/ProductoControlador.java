@@ -1,9 +1,13 @@
 package tienda.milagro.sistemafacturacion.web.controladores;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import tienda.milagro.sistemafacturacion.dominio.excepciones.ProveedorNoEncontradoExcepcion;
 import tienda.milagro.sistemafacturacion.dominio.servicios.ProductoServicio;
 import tienda.milagro.sistemafacturacion.persistencia.modelos.Producto;
 
@@ -12,7 +16,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/productos")
-@PreAuthorize("hasRole('ADMINISTRADOR')")
+@Tag(name = "Productos", description = "Gestion de productos")
+@SecurityRequirement(name = "bearerAuth")
 public class ProductoControlador {
 
     private final ProductoServicio productoServicio;
@@ -26,6 +31,8 @@ public class ProductoControlador {
     // Retorna todos los productos sin filtrar por estado.
     // -------------------------------------------------------------------------
     @GetMapping("/listar")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Listar productos", description = "Retorna todos los productos")
     public ResponseEntity<?> listarTodos() {
         try {
             List<Producto> productos = productoServicio.listarTodos();
@@ -40,6 +47,8 @@ public class ProductoControlador {
     // Retorna únicamente los productos con esActivo = true.
     // -------------------------------------------------------------------------
     @GetMapping("/listar/activos")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Listar productos activos", description = "Retorna solo productos activos")
     public ResponseEntity<?> listarActivos() {
         try {
             List<Producto> productos = productoServicio.listarActivos();
@@ -54,6 +63,8 @@ public class ProductoControlador {
     // Retorna el producto correspondiente al id indicado.
     // -------------------------------------------------------------------------
     @GetMapping("/buscar/{id}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Buscar producto por ID", description = "Obtiene un producto especifico por su id")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         try {
             Producto producto = productoServicio.buscarPorId(id);
@@ -66,16 +77,20 @@ public class ProductoControlador {
     }
 
     // -------------------------------------------------------------------------
-    // POST /productos/registrar
+    // POST /productos
     // Crea un nuevo producto. Recibe el cuerpo en formato JSON.
     // -------------------------------------------------------------------------
-    @PostMapping("/registrar")
+    @PostMapping({"", "/registrar"})
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Registrar producto", description = "Crea un producto y su stock inicial en una sola transaccion")
     public ResponseEntity<?> registrar(@RequestBody Producto producto) {
         try {
-            Producto guardado = productoServicio.registrar(producto);
+            Producto guardado = productoServicio.registrarProducto(producto);
             return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
         } catch (IllegalArgumentException e) {
             return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (ProveedorNoEncontradoExcepcion e) {
+            return buildError(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
             return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -86,11 +101,15 @@ public class ProductoControlador {
     // Actualiza los campos modificables de un producto existente.
     // -------------------------------------------------------------------------
     @PutMapping("/actualizar/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Actualizar producto", description = "Actualiza los campos editables de un producto existente")
     public ResponseEntity<?> actualizar(@PathVariable Long id,
                                         @RequestBody Producto producto) {
         try {
             Producto actualizado = productoServicio.actualizar(id, producto);
             return ResponseEntity.ok(actualizado);
+        } catch (ProveedorNoEncontradoExcepcion e) {
+            return buildError(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (RuntimeException e) {
             // Distingue entre "no encontrado" e "argumento inválido"
             if (e instanceof IllegalArgumentException) {
@@ -107,6 +126,8 @@ public class ProductoControlador {
     // Realiza la eliminación lógica (esActivo = false).
     // -------------------------------------------------------------------------
     @DeleteMapping("/eliminar/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Desactivar producto", description = "Realiza eliminacion logica del producto")
     public ResponseEntity<?> desactivar(@PathVariable Long id) {
         try {
             productoServicio.desactivar(id);
