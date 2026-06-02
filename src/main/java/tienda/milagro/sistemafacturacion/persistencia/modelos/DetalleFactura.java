@@ -1,5 +1,6 @@
 package tienda.milagro.sistemafacturacion.persistencia.modelos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
@@ -18,6 +21,8 @@ import java.math.BigDecimal;
         name = "DETALLE_FACTURA",
         uniqueConstraints = @UniqueConstraint(name = "UK_DETALLE_FACTURA_FAC_PRO", columnNames = {"FAC_ID", "PRO_ID"})
 )
+@Getter
+@Setter
 public class DetalleFactura {
 
     @Id
@@ -27,6 +32,7 @@ public class DetalleFactura {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FAC_ID", nullable = false)
+    @JsonIgnore
     private Factura factura;
 
     @ManyToOne(fetch = FetchType.LAZY)
