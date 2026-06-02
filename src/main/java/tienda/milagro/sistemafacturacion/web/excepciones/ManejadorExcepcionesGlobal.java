@@ -13,6 +13,10 @@ import tienda.milagro.sistemafacturacion.dominio.excepciones.ReporteInvalidoExce
 import tienda.milagro.sistemafacturacion.dominio.excepciones.StockInsuficienteExcepcion;
 import tienda.milagro.sistemafacturacion.dominio.excepciones.UsuarioInactivoExcepcion;
 import tienda.milagro.sistemafacturacion.dominio.excepciones.UsuarioNoEncontradoExcepcion;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import tienda.milagro.sistemafacturacion.dominio.excepciones.UsuarioDuplicadoExcepcion;
+
+import java.util.HashMap;
 
 import java.util.Map;
 
@@ -77,6 +81,20 @@ public class ManejadorExcepcionesGlobal {
     public ResponseEntity<Map<String, String>> manejarArgumentoInvalido(IllegalArgumentException excepcion) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", excepcion.getMessage()));
+    }
+
+    @ExceptionHandler(UsuarioDuplicadoExcepcion.class)
+        public ResponseEntity<Map<String, String>> manejarUsuarioDuplicado(UsuarioDuplicadoExcepcion excepcion) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", excepcion.getMessage()));
+        }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> manejarValidaciones(MethodArgumentNotValidException excepcion) {
+        Map<String, String> errores = new HashMap<>();
+        excepcion.getBindingResult().getFieldErrors()
+                .forEach(error -> errores.put(error.getField(), error.getDefaultMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errores);
     }
 
 }
