@@ -29,6 +29,9 @@ import com.lowagie.text.Paragraph;
 import com.lowagie.text.Table;
 import com.lowagie.text.pdf.PdfWriter;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -363,6 +366,10 @@ public class FacturaServicioImpl implements FacturaServicio {
              XSSFWorkbook libroTrabajo = new XSSFWorkbook()) {
 
             XSSFSheet hoja = libroTrabajo.createSheet("Reporte Facturacion");
+            CellStyle estiloEncabezadoExcel = crearEstiloEncabezadoExcel(libroTrabajo);
+            CellStyle estiloMonedaExcel = crearEstiloMonedaExcel(libroTrabajo, false);
+            CellStyle estiloMonedaTotalExcel = crearEstiloMonedaExcel(libroTrabajo, true);
+            CellStyle estiloTextoTotalExcel = crearEstiloTextoTotalExcel(libroTrabajo);
 
             int numeroFila = 0;
             XSSFRow filaEncabezado = hoja.createRow(numeroFila++);
@@ -371,6 +378,7 @@ public class FacturaServicioImpl implements FacturaServicio {
             for (int i = 0; i < encabezados.length; i++) {
                 XSSFCell celda = filaEncabezado.createCell(i);
                 celda.setCellValue(encabezados[i]);
+                celda.setCellStyle(estiloEncabezadoExcel);
             }
 
             @SuppressWarnings("unchecked")
@@ -381,22 +389,74 @@ public class FacturaServicioImpl implements FacturaServicio {
 
                 XSSFRow fila = hoja.createRow(numeroFila++);
                 fila.createCell(0).setCellValue(factura.getId());
-                fila.createCell(1).setCellValue(factura.getFecha().toString());
-                fila.createCell(2).setCellValue(factura.getCliente().getPrimerNombre());
-                fila.createCell(3).setCellValue(factura.getSubtotal().doubleValue());
-                fila.createCell(4).setCellValue(montoIva.doubleValue());
-                fila.createCell(5).setCellValue(factura.getTotal().doubleValue());
+                fila.createCell(1).setCellValue(formatearFechaFrances(factura.getFecha()));
+                fila.createCell(2).setCellValue(obtenerNombreClienteParaReporte(factura));
+
+                XSSFCell celdaSubtotal = fila.createCell(3);
+                celdaSubtotal.setCellValue(factura.getSubtotal().doubleValue());
+                celdaSubtotal.setCellStyle(estiloMonedaExcel);
+
+                XSSFCell celdaIva = fila.createCell(4);
+                celdaIva.setCellValue(montoIva.doubleValue());
+                celdaIva.setCellStyle(estiloMonedaExcel);
+
+                XSSFCell celdaTotal = fila.createCell(5);
+                celdaTotal.setCellValue(factura.getTotal().doubleValue());
+                celdaTotal.setCellStyle(estiloMonedaExcel);
             }
 
             XSSFRow filaTotal = hoja.createRow(numeroFila);
-            filaTotal.createCell(0).setCellValue("TOTAL MENSUAL");
-            filaTotal.createCell(5).setCellValue(((BigDecimal) reporte.get("totalMensual")).doubleValue());
+            XSSFCell celdaEtiquetaTotal = filaTotal.createCell(4);
+            celdaEtiquetaTotal.setCellValue("TOTAL MENSUAL");
+            celdaEtiquetaTotal.setCellStyle(estiloTextoTotalExcel);
+
+            XSSFCell celdaValorTotal = filaTotal.createCell(5);
+            celdaValorTotal.setCellValue(((BigDecimal) reporte.get("totalMensual")).doubleValue());
+            celdaValorTotal.setCellStyle(estiloMonedaTotalExcel);
+
+            for (int i = 0; i < encabezados.length; i++) {
+                hoja.autoSizeColumn(i);
+            }
 
             libroTrabajo.write(baos);
             return baos.toByteArray();
         } catch (IOException ex) {
             throw new RuntimeException("Error al generar reporte Excel: " + ex.getMessage(), ex);
         }
+    }
+
+    private CellStyle crearEstiloEncabezadoExcel(XSSFWorkbook libroTrabajo) {
+        CellStyle estilo = libroTrabajo.createCellStyle();
+        estilo.setFillForegroundColor(IndexedColors.GREY_80_PERCENT.getIndex());
+        estilo.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        estilo.setAlignment(HorizontalAlignment.CENTER);
+
+        org.apache.poi.ss.usermodel.Font fuente = libroTrabajo.createFont();
+        fuente.setBold(true);
+        fuente.setColor(IndexedColors.WHITE.getIndex());
+        estilo.setFont(fuente);
+        return estilo;
+    }
+
+    private CellStyle crearEstiloMonedaExcel(XSSFWorkbook libroTrabajo, boolean negrita) {
+        CellStyle estilo = libroTrabajo.createCellStyle();
+        estilo.setDataFormat(libroTrabajo.createDataFormat().getFormat("$#,##0.00"));
+        estilo.setAlignment(HorizontalAlignment.RIGHT);
+
+        org.apache.poi.ss.usermodel.Font fuente = libroTrabajo.createFont();
+        fuente.setBold(negrita);
+        estilo.setFont(fuente);
+        return estilo;
+    }
+
+    private CellStyle crearEstiloTextoTotalExcel(XSSFWorkbook libroTrabajo) {
+        CellStyle estilo = libroTrabajo.createCellStyle();
+        estilo.setAlignment(HorizontalAlignment.RIGHT);
+
+        org.apache.poi.ss.usermodel.Font fuente = libroTrabajo.createFont();
+        fuente.setBold(true);
+        estilo.setFont(fuente);
+        return estilo;
     }
 
     private void validarSolicitudFactura(Factura facturaSolicitud) {
