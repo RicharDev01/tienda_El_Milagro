@@ -37,6 +37,7 @@ public class AutenticacionServicioImpl implements AutenticacionServicio {
                 .toList();
 
         return Map.of(
+                "idUsuario", usuario.getId(),
                 "token", token,
                 "tipo", "Bearer",
                 "nombreUsuario", usuario.getNombreUsuario(),
