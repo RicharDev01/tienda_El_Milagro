@@ -19,5 +19,9 @@ public interface FacturaServicio {
 
     Map<String, Object> generarReporteMensual(Integer mes, Integer anio);
 
+    byte[] generarReporteMensualPdf(Integer mes, Integer anio);
+
+    byte[] generarReporteMensualExcel(Integer mes, Integer anio);
+
 }
 

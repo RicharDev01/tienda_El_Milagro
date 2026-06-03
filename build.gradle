@@ -36,6 +36,10 @@ dependencies {
     // Documentación de API con Springdoc OpenAPI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
 
+    // Exportación de reportes PDF y Excel
+    implementation 'com.github.librepdf:openpdf:1.3.34'
+    implementation 'org.apache.poi:poi-ooxml:5.2.4'
+
     // Herramientas de desarrollo y anotaciones de Lombok
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -45,6 +49,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testRuntimeOnly 'com.h2database:h2'
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
