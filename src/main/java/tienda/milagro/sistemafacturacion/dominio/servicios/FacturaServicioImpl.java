@@ -2,6 +2,7 @@ package tienda.milagro.sistemafacturacion.dominio.servicios;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.core.io.ClassPathResource;
 import tienda.milagro.sistemafacturacion.dominio.excepciones.ClienteNoEncontradoExcepcion;
 import tienda.milagro.sistemafacturacion.dominio.excepciones.FacturaNoEncontradaExcepcion;
 import tienda.milagro.sistemafacturacion.dominio.excepciones.ProductoNoEncontradoExcepcion;
@@ -20,11 +21,33 @@ import tienda.milagro.sistemafacturacion.persistencia.modelos.Producto;
 import tienda.milagro.sistemafacturacion.persistencia.modelos.Stock;
 import tienda.milagro.sistemafacturacion.persistencia.modelos.Usuario;
 
+import com.lowagie.text.Cell;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Image;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Table;
+import com.lowagie.text.pdf.PdfWriter;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import java.awt.Color;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -37,6 +60,9 @@ import java.util.Set;
 public class FacturaServicioImpl implements FacturaServicio {
 
     private static final BigDecimal PORCENTAJE_IVA = new BigDecimal("0.13");
+    private static final String RUTA_LOGO_REPORTE_PDF = "reportes/logo-reporte.png";
+    private static final DateTimeFormatter FORMATO_FECHA_REPORTE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DecimalFormat FORMATO_MONEDA_REPORTE = new DecimalFormat("$#,##0.00");
 
     private final FacturaRepositorio facturaRepositorio;
     private final ClienteRepositorio clienteRepositorio;
@@ -196,6 +222,241 @@ public class FacturaServicioImpl implements FacturaServicio {
                 "totalMensual", totalMensual,
                 "facturas", facturas
         );
+    }
+
+    @Override
+    public byte[] generarReporteMensualPdf(Integer mes, Integer anio) {
+        /*
+         * Se reutiliza el reporte mensual existente
+         * para garantizar consistencia entre la API,
+         * el PDF y el Excel.
+         */
+        Map<String, Object> reporte = generarReporteMensual(mes, anio);
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            Document documento = new Document();
+            PdfWriter.getInstance(documento, baos);
+            documento.open();
+
+            agregarLogoReporteSiExiste(documento);
+
+            com.lowagie.text.Font fonteTitulo = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 16, com.lowagie.text.Font.BOLD);
+            com.lowagie.text.Font fonteEncabezado = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 11, com.lowagie.text.Font.BOLD);
+            com.lowagie.text.Font fonteEncabezadoTabla = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 11, com.lowagie.text.Font.BOLD, Color.WHITE);
+            com.lowagie.text.Font fonteNormal = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 10);
+
+            documento.add(new Paragraph("Reporte Mensual de Facturacion", fonteTitulo));
+            documento.add(new Paragraph(" "));
+
+            documento.add(new Paragraph("Mes: " + mes, fonteEncabezado));
+            documento.add(new Paragraph("Anio: " + anio, fonteEncabezado));
+            documento.add(new Paragraph("Fecha Inicio: " + formatearFechaFrances((LocalDate) reporte.get("fechaInicio")), fonteEncabezado));
+            documento.add(new Paragraph("Fecha Fin: " + formatearFechaFrances((LocalDate) reporte.get("fechaFin")), fonteEncabezado));
+            documento.add(new Paragraph("Cantidad de Facturas: " + reporte.get("cantidadFacturas"), fonteEncabezado));
+            documento.add(new Paragraph("Total Mensual: " + formatearMoneda((BigDecimal) reporte.get("totalMensual")), fonteEncabezado));
+            documento.add(new Paragraph(" "));
+
+            Table tabla = new Table(6);
+            tabla.setWidth(100);
+            tabla.setPadding(5);
+
+            Cell celdaFactura = new Cell(new Paragraph("Factura", fonteEncabezadoTabla));
+            Cell celdaFecha = new Cell(new Paragraph("Fecha", fonteEncabezadoTabla));
+            Cell celdaCliente = new Cell(new Paragraph("Cliente", fonteEncabezadoTabla));
+            Cell celdaSubtotal = new Cell(new Paragraph("Subtotal", fonteEncabezadoTabla));
+            Cell celdaIva = new Cell(new Paragraph("IVA", fonteEncabezadoTabla));
+            Cell celdaTotal = new Cell(new Paragraph("Total", fonteEncabezadoTabla));
+
+            aplicarEstiloEncabezado(celdaFactura);
+            aplicarEstiloEncabezado(celdaFecha);
+            aplicarEstiloEncabezado(celdaCliente);
+            aplicarEstiloEncabezado(celdaSubtotal);
+            aplicarEstiloEncabezado(celdaIva);
+            aplicarEstiloEncabezado(celdaTotal);
+
+            tabla.addCell(celdaFactura);
+            tabla.addCell(celdaFecha);
+            tabla.addCell(celdaCliente);
+            tabla.addCell(celdaSubtotal);
+            tabla.addCell(celdaIva);
+            tabla.addCell(celdaTotal);
+
+            @SuppressWarnings("unchecked")
+            List<Factura> facturas = (List<Factura>) reporte.get("facturas");
+
+            for (Factura factura : facturas) {
+                BigDecimal montoIva = factura.getSubtotal().multiply(PORCENTAJE_IVA).setScale(2, RoundingMode.HALF_UP);
+
+                tabla.addCell(new Cell(new Paragraph(factura.getId(), fonteNormal)));
+                tabla.addCell(new Cell(new Paragraph(formatearFechaFrances(factura.getFecha()), fonteNormal)));
+                tabla.addCell(new Cell(new Paragraph(obtenerNombreClienteParaReporte(factura), fonteNormal)));
+                tabla.addCell(new Cell(new Paragraph(formatearMoneda(factura.getSubtotal()), fonteNormal)));
+                tabla.addCell(new Cell(new Paragraph(formatearMoneda(montoIva), fonteNormal)));
+                tabla.addCell(new Cell(new Paragraph(formatearMoneda(factura.getTotal()), fonteNormal)));
+            }
+
+            documento.add(tabla);
+            documento.close();
+
+            return baos.toByteArray();
+        } catch (DocumentException | IOException ex) {
+            throw new RuntimeException("Error al generar reporte PDF: " + ex.getMessage(), ex);
+        }
+    }
+
+    private void agregarLogoReporteSiExiste(Document documento) throws IOException, DocumentException {
+        ClassPathResource recursoLogo = new ClassPathResource(RUTA_LOGO_REPORTE_PDF);
+        if (!recursoLogo.exists()) {
+            return;
+        }
+
+        try (InputStream inputStream = recursoLogo.getInputStream()) {
+            Image logo = Image.getInstance(inputStream.readAllBytes());
+            logo.scaleToFit(130, 60);
+            logo.setAlignment(Image.ALIGN_RIGHT);
+            documento.add(logo);
+            documento.add(new Paragraph(" "));
+        }
+    }
+
+    private void aplicarEstiloEncabezado(Cell celda) {
+        celda.setBackgroundColor(Color.DARK_GRAY);
+    }
+
+    private String formatearFechaFrances(LocalDate fecha) {
+        if (fecha == null) {
+            return "";
+        }
+        return fecha.format(FORMATO_FECHA_REPORTE);
+    }
+
+    private String formatearMoneda(BigDecimal monto) {
+        if (monto == null) {
+            return "$0.00";
+        }
+        return FORMATO_MONEDA_REPORTE.format(monto.setScale(2, RoundingMode.HALF_UP));
+    }
+
+    private String obtenerNombreClienteParaReporte(Factura factura) {
+        if (factura == null || factura.getCliente() == null) {
+            return "N/A";
+        }
+
+        String nombre = factura.getCliente().getPrimerNombre() == null
+                ? ""
+                : factura.getCliente().getPrimerNombre().trim();
+        String apellido = factura.getCliente().getPrimerApellido() == null
+                ? ""
+                : factura.getCliente().getPrimerApellido().trim();
+
+        String nombreCompleto = (nombre + " " + apellido).trim();
+        return nombreCompleto.isEmpty() ? "N/A" : nombreCompleto;
+    }
+
+    @Override
+    public byte[] generarReporteMensualExcel(Integer mes, Integer anio) {
+        /*
+         * Se reutiliza el reporte mensual existente
+         * para garantizar consistencia entre la API,
+         * el PDF y el Excel.
+         */
+        Map<String, Object> reporte = generarReporteMensual(mes, anio);
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             XSSFWorkbook libroTrabajo = new XSSFWorkbook()) {
+
+            XSSFSheet hoja = libroTrabajo.createSheet("Reporte Facturacion");
+            CellStyle estiloEncabezadoExcel = crearEstiloEncabezadoExcel(libroTrabajo);
+            CellStyle estiloMonedaExcel = crearEstiloMonedaExcel(libroTrabajo, false);
+            CellStyle estiloMonedaTotalExcel = crearEstiloMonedaExcel(libroTrabajo, true);
+            CellStyle estiloTextoTotalExcel = crearEstiloTextoTotalExcel(libroTrabajo);
+
+            int numeroFila = 0;
+            XSSFRow filaEncabezado = hoja.createRow(numeroFila++);
+
+            String[] encabezados = {"Factura", "Fecha", "Cliente", "Subtotal", "IVA", "Total"};
+            for (int i = 0; i < encabezados.length; i++) {
+                XSSFCell celda = filaEncabezado.createCell(i);
+                celda.setCellValue(encabezados[i]);
+                celda.setCellStyle(estiloEncabezadoExcel);
+            }
+
+            @SuppressWarnings("unchecked")
+            List<Factura> facturas = (List<Factura>) reporte.get("facturas");
+
+            for (Factura factura : facturas) {
+                BigDecimal montoIva = factura.getSubtotal().multiply(PORCENTAJE_IVA).setScale(2, RoundingMode.HALF_UP);
+
+                XSSFRow fila = hoja.createRow(numeroFila++);
+                fila.createCell(0).setCellValue(factura.getId());
+                fila.createCell(1).setCellValue(formatearFechaFrances(factura.getFecha()));
+                fila.createCell(2).setCellValue(obtenerNombreClienteParaReporte(factura));
+
+                XSSFCell celdaSubtotal = fila.createCell(3);
+                celdaSubtotal.setCellValue(factura.getSubtotal().doubleValue());
+                celdaSubtotal.setCellStyle(estiloMonedaExcel);
+
+                XSSFCell celdaIva = fila.createCell(4);
+                celdaIva.setCellValue(montoIva.doubleValue());
+                celdaIva.setCellStyle(estiloMonedaExcel);
+
+                XSSFCell celdaTotal = fila.createCell(5);
+                celdaTotal.setCellValue(factura.getTotal().doubleValue());
+                celdaTotal.setCellStyle(estiloMonedaExcel);
+            }
+
+            XSSFRow filaTotal = hoja.createRow(numeroFila);
+            XSSFCell celdaEtiquetaTotal = filaTotal.createCell(4);
+            celdaEtiquetaTotal.setCellValue("TOTAL MENSUAL");
+            celdaEtiquetaTotal.setCellStyle(estiloTextoTotalExcel);
+
+            XSSFCell celdaValorTotal = filaTotal.createCell(5);
+            celdaValorTotal.setCellValue(((BigDecimal) reporte.get("totalMensual")).doubleValue());
+            celdaValorTotal.setCellStyle(estiloMonedaTotalExcel);
+
+            for (int i = 0; i < encabezados.length; i++) {
+                hoja.autoSizeColumn(i);
+            }
+
+            libroTrabajo.write(baos);
+            return baos.toByteArray();
+        } catch (IOException ex) {
+            throw new RuntimeException("Error al generar reporte Excel: " + ex.getMessage(), ex);
+        }
+    }
+
+    private CellStyle crearEstiloEncabezadoExcel(XSSFWorkbook libroTrabajo) {
+        CellStyle estilo = libroTrabajo.createCellStyle();
+        estilo.setFillForegroundColor(IndexedColors.GREY_80_PERCENT.getIndex());
+        estilo.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        estilo.setAlignment(HorizontalAlignment.CENTER);
+
+        org.apache.poi.ss.usermodel.Font fuente = libroTrabajo.createFont();
+        fuente.setBold(true);
+        fuente.setColor(IndexedColors.WHITE.getIndex());
+        estilo.setFont(fuente);
+        return estilo;
+    }
+
+    private CellStyle crearEstiloMonedaExcel(XSSFWorkbook libroTrabajo, boolean negrita) {
+        CellStyle estilo = libroTrabajo.createCellStyle();
+        estilo.setDataFormat(libroTrabajo.createDataFormat().getFormat("$#,##0.00"));
+        estilo.setAlignment(HorizontalAlignment.RIGHT);
+
+        org.apache.poi.ss.usermodel.Font fuente = libroTrabajo.createFont();
+        fuente.setBold(negrita);
+        estilo.setFont(fuente);
+        return estilo;
+    }
+
+    private CellStyle crearEstiloTextoTotalExcel(XSSFWorkbook libroTrabajo) {
+        CellStyle estilo = libroTrabajo.createCellStyle();
+        estilo.setAlignment(HorizontalAlignment.RIGHT);
+
+        org.apache.poi.ss.usermodel.Font fuente = libroTrabajo.createFont();
+        fuente.setBold(true);
+        estilo.setFont(fuente);
+        return estilo;
     }
 
     private void validarSolicitudFactura(Factura facturaSolicitud) {

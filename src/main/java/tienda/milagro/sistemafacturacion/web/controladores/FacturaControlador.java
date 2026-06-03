@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,6 +82,38 @@ public class FacturaControlador {
                                                                      @RequestParam Integer anio) {
         Map<String, Object> reporte = facturaServicio.generarReporteMensual(mes, anio);
         return ResponseEntity.ok(reporte);
+    }
+
+    @GetMapping("/reporte-mensual/pdf")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Exportar reporte mensual PDF", description = "Genera y descarga el reporte mensual de facturacion en formato PDF")
+    public ResponseEntity<byte[]> generarReporteMensualPdf(@RequestParam Integer mes,
+                                                           @RequestParam Integer anio) {
+        byte[] contenidoPdf = facturaServicio.generarReporteMensualPdf(mes, anio);
+
+        HttpHeaders encabezados = new HttpHeaders();
+        encabezados.setContentType(MediaType.APPLICATION_PDF);
+        encabezados.setContentDispositionFormData("attachment", "reporte_" + mes + "_" + anio + ".pdf");
+
+        return ResponseEntity.ok()
+                .headers(encabezados)
+                .body(contenidoPdf);
+    }
+
+    @GetMapping("/reporte-mensual/excel")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Exportar reporte mensual Excel", description = "Genera y descarga el reporte mensual de facturacion en formato Excel")
+    public ResponseEntity<byte[]> generarReporteMensualExcel(@RequestParam Integer mes,
+                                                             @RequestParam Integer anio) {
+        byte[] contenidoExcel = facturaServicio.generarReporteMensualExcel(mes, anio);
+
+        HttpHeaders encabezados = new HttpHeaders();
+        encabezados.setContentType(MediaType.valueOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        encabezados.setContentDispositionFormData("attachment", "reporte_" + mes + "_" + anio + ".xlsx");
+
+        return ResponseEntity.ok()
+                .headers(encabezados)
+                .body(contenidoExcel);
     }
 }
 
