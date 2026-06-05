@@ -45,7 +45,7 @@ public interface FacturaRepositorio extends JpaRepository<Factura, String> {
     @Query("""
             SELECT f.id
             FROM Factura f
-            WHERE f.id LIKE 'F%'
+            WHERE f.id LIKE 'FAC%'
             ORDER BY f.id DESC
             """)
     List<String> buscarIdsFacturaDesc();
