@@ -186,8 +186,9 @@ public class FacturaServicioImpl implements FacturaServicio {
 
     @Override
     public Factura consultarFacturaPorId(String idFactura) {
-        return facturaRepositorio.findById(idFactura)
-                .orElseThrow(() -> new FacturaNoEncontradaExcepcion(idFactura));
+        String facturaId = idFactura.toUpperCase();
+        return facturaRepositorio.findById(facturaId)
+                .orElseThrow(() -> new FacturaNoEncontradaExcepcion(facturaId));
     }
 
     @Override
@@ -521,7 +522,7 @@ public class FacturaServicioImpl implements FacturaServicio {
     private String generarIdFactura() {
         List<String> ids = facturaRepositorio.buscarIdsFacturaDesc();
         if (ids.isEmpty()) {
-            return "FAC00001";
+            return "FAC001";
         }
 
         String ultimoId = ids.getFirst();
@@ -531,7 +532,7 @@ public class FacturaServicioImpl implements FacturaServicio {
                     ultimoId.replace("FAC", "")
             );
 
-            return String.format("FAC%07d", correlativo + 1);
+            return String.format("FAC%03d", correlativo + 1);
 
         } catch (RuntimeException ex) {
             throw new IllegalStateException("No fue posible generar el correlativo de factura.");
