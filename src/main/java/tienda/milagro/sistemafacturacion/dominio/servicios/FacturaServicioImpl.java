@@ -24,8 +24,10 @@ import tienda.milagro.sistemafacturacion.persistencia.modelos.Usuario;
 import com.lowagie.text.Cell;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
 import com.lowagie.text.Image;
 import com.lowagie.text.Paragraph;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.Table;
 import com.lowagie.text.pdf.PdfWriter;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -303,6 +305,166 @@ public class FacturaServicioImpl implements FacturaServicio {
         } catch (DocumentException | IOException ex) {
             throw new RuntimeException("Error al generar reporte PDF: " + ex.getMessage(), ex);
         }
+    }
+
+    @Override
+    public byte[] imprimirFacturaPdf(String idFactura) {
+        Factura factura = consultarFacturaPorId(idFactura);
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            Document documento = new Document();
+            PdfWriter.getInstance(documento, baos);
+            documento.open();
+
+            com.lowagie.text.Font fonteEmpresa = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 16, com.lowagie.text.Font.BOLD);
+            com.lowagie.text.Font fonteTituloFactura = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 14, com.lowagie.text.Font.BOLD);
+            com.lowagie.text.Font fonteNumeroFactura = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 12, com.lowagie.text.Font.BOLD);
+            com.lowagie.text.Font fonteSeccion = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 10, com.lowagie.text.Font.BOLD);
+            com.lowagie.text.Font fonteNormal = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 10);
+            com.lowagie.text.Font fonteEncabezadoTabla = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 10, com.lowagie.text.Font.BOLD, Color.WHITE);
+            com.lowagie.text.Font fonteTotalNegrita = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 11, com.lowagie.text.Font.BOLD, Color.WHITE);
+
+            // ── Logo opcional ─────────────────────────────────────────────
+            agregarLogoReporteSiExiste(documento);
+
+            // ── Encabezado ────────────────────────────────────────────────
+            Paragraph nombreEmpresa = new Paragraph("TIENDA EL MILAGRO", fonteEmpresa);
+            nombreEmpresa.setAlignment(Element.ALIGN_CENTER);
+            documento.add(nombreEmpresa);
+
+            Paragraph tituloFactura = new Paragraph("FACTURA", fonteTituloFactura);
+            tituloFactura.setAlignment(Element.ALIGN_CENTER);
+            documento.add(tituloFactura);
+
+            Paragraph numeroFactura = new Paragraph("No. " + factura.getId(), fonteNumeroFactura);
+            numeroFactura.setAlignment(Element.ALIGN_CENTER);
+            documento.add(numeroFactura);
+
+            documento.add(new Paragraph(" "));
+
+            // ── Información: cliente (izquierda) | emisión (derecha) ──────
+            Table tablaInfo = new Table(2);
+            tablaInfo.setWidth(100);
+            tablaInfo.setBorderWidth(0);
+            tablaInfo.setPadding(4);
+
+            Cell celdaCliente = new Cell();
+            celdaCliente.setBorder(Rectangle.NO_BORDER);
+            celdaCliente.add(new Paragraph("DATOS DEL CLIENTE", fonteSeccion));
+            celdaCliente.add(new Paragraph("Nombre: " + obtenerNombreCompletoCliente(factura), fonteNormal));
+            celdaCliente.add(new Paragraph("DUI: " + (factura.getCliente() != null ? factura.getCliente().getDui() : ""), fonteNormal));
+            tablaInfo.addCell(celdaCliente);
+
+            Cell celdaEmision = new Cell();
+            celdaEmision.setBorder(Rectangle.NO_BORDER);
+            celdaEmision.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            celdaEmision.add(new Paragraph("EMISION", fonteSeccion));
+            celdaEmision.add(new Paragraph("Fecha: " + formatearFechaFrances(factura.getFecha()), fonteNormal));
+            celdaEmision.add(new Paragraph("Emitido por: " + (factura.getUsuario() != null ? factura.getUsuario().getNombreUsuario() : ""), fonteNormal));
+            tablaInfo.addCell(celdaEmision);
+
+            documento.add(tablaInfo);
+            documento.add(new Paragraph(" "));
+
+            // ── Tabla de productos ────────────────────────────────────────
+            Table tablaProductos = new Table(4);
+            tablaProductos.setWidth(100);
+            tablaProductos.setPadding(5);
+            tablaProductos.setWidths(new float[]{48, 12, 20, 20});
+
+            // Encabezados de tabla
+            String[] encabezados = {"Producto", "Cantidad", "Precio Unitario", "Total"};
+            for (String enc : encabezados) {
+                Cell celda = new Cell(new Paragraph(enc, fonteEncabezadoTabla));
+                aplicarEstiloEncabezado(celda);
+                celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                tablaProductos.addCell(celda);
+            }
+
+            // Filas de detalle
+            for (DetalleFactura detalle : factura.getDetalles()) {
+                String nombreProducto = (detalle.getProducto() != null)
+                        ? detalle.getProducto().getNombreProducto()
+                        : "N/A";
+
+                tablaProductos.addCell(new Cell(new Paragraph(nombreProducto, fonteNormal)));
+
+                Cell celdaCantidad = new Cell(new Paragraph(String.valueOf(detalle.getCantidad()), fonteNormal));
+                celdaCantidad.setHorizontalAlignment(Element.ALIGN_CENTER);
+                tablaProductos.addCell(celdaCantidad);
+
+                Cell celdaPrecio = new Cell(new Paragraph(formatearMoneda(detalle.getPrecioUnitario()), fonteNormal));
+                celdaPrecio.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                tablaProductos.addCell(celdaPrecio);
+
+                Cell celdaCosto = new Cell(new Paragraph(formatearMoneda(detalle.getCosto()), fonteNormal));
+                celdaCosto.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                tablaProductos.addCell(celdaCosto);
+            }
+
+            // ── Fila Subtotal ─────────────────────────────────────────────
+            BigDecimal montoIva = factura.getSubtotal().multiply(PORCENTAJE_IVA).setScale(2, RoundingMode.HALF_UP);
+
+            Cell etiquetaSubtotal = new Cell(new Paragraph("Subtotal", fonteSeccion));
+            etiquetaSubtotal.setColspan(3);
+            etiquetaSubtotal.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            tablaProductos.addCell(etiquetaSubtotal);
+
+            Cell valorSubtotal = new Cell(new Paragraph(formatearMoneda(factura.getSubtotal()), fonteNormal));
+            valorSubtotal.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            tablaProductos.addCell(valorSubtotal);
+
+            // ── Fila IVA ──────────────────────────────────────────────────
+            Cell etiquetaIva = new Cell(new Paragraph("IVA (13%)", fonteSeccion));
+            etiquetaIva.setColspan(3);
+            etiquetaIva.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            tablaProductos.addCell(etiquetaIva);
+
+            Cell valorIva = new Cell(new Paragraph(formatearMoneda(montoIva), fonteNormal));
+            valorIva.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            tablaProductos.addCell(valorIva);
+
+            // ── Fila TOTAL ────────────────────────────────────────────────
+            Cell etiquetaTotal = new Cell(new Paragraph("TOTAL", fonteTotalNegrita));
+            etiquetaTotal.setColspan(3);
+            etiquetaTotal.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            etiquetaTotal.setBackgroundColor(Color.DARK_GRAY);
+            tablaProductos.addCell(etiquetaTotal);
+
+            Cell valorTotal = new Cell(new Paragraph(formatearMoneda(factura.getTotal()), fonteTotalNegrita));
+            valorTotal.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            valorTotal.setBackgroundColor(Color.DARK_GRAY);
+            tablaProductos.addCell(valorTotal);
+
+            documento.add(tablaProductos);
+
+            // ── Pie de página ─────────────────────────────────────────────
+            documento.add(new Paragraph(" "));
+            Paragraph pie = new Paragraph("Gracias por su compra. - Tienda El Milagro", fonteNormal);
+            pie.setAlignment(Element.ALIGN_CENTER);
+            documento.add(pie);
+
+            documento.close();
+            return baos.toByteArray();
+
+        } catch (DocumentException | IOException ex) {
+            throw new RuntimeException("Error al generar PDF de factura: " + ex.getMessage(), ex);
+        }
+    }
+
+    private String obtenerNombreCompletoCliente(Factura factura) {
+        if (factura == null || factura.getCliente() == null) {
+            return "N/A";
+        }
+        Cliente cliente = factura.getCliente();
+
+        String nombre1 = cliente.getPrimerNombre() == null ? "" : cliente.getPrimerNombre().trim();
+        String nombre2 = cliente.getSegundoNombre() == null ? "" : cliente.getSegundoNombre().trim();
+        String apellido1 = cliente.getPrimerApellido() == null ? "" : cliente.getPrimerApellido().trim();
+        String apellido2 = cliente.getSegundoApellido() == null ? "" : cliente.getSegundoApellido().trim();
+
+        String completo = (nombre1 + " " + nombre2 + " " + apellido1 + " " + apellido2).replaceAll("\\s+", " ").trim();
+        return completo.isEmpty() ? "N/A" : completo;
     }
 
     private void agregarLogoReporteSiExiste(Document documento) throws IOException, DocumentException {

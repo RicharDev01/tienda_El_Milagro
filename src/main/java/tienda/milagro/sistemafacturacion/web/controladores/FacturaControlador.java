@@ -115,5 +115,21 @@ public class FacturaControlador {
                 .headers(encabezados)
                 .body(contenidoExcel);
     }
+
+    @GetMapping("/{idFactura}/pdf")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR')")
+    @Operation(summary = "Imprimir factura en PDF",
+            description = "Genera y descarga el comprobante PDF de una factura especifica por su ID")
+    public ResponseEntity<byte[]> imprimirFacturaPdf(@PathVariable String idFactura) {
+        byte[] contenidoPdf = facturaServicio.imprimirFacturaPdf(idFactura);
+
+        HttpHeaders encabezados = new HttpHeaders();
+        encabezados.setContentType(MediaType.APPLICATION_PDF);
+        encabezados.setContentDispositionFormData("attachment", "factura_" + idFactura.toUpperCase() + "_" + LocalDate.now() + ".pdf");
+
+        return ResponseEntity.ok()
+                .headers(encabezados)
+                .body(contenidoPdf);
+    }
 }
 

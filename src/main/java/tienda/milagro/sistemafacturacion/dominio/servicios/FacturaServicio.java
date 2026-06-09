@@ -23,5 +23,7 @@ public interface FacturaServicio {
 
     byte[] generarReporteMensualExcel(Integer mes, Integer anio);
 
+    byte[] imprimirFacturaPdf(String idFactura);
+
 }
 
